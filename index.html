@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>三川通證測驗題目</title>
+    <style>
+        #app {
+            width: 500px;
+            margin: 0 auto;
+        }
+
+        table,
+        td {
+            border: 1px solid #333;
+        }
+
+        thead,
+        tfoot {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .v {
+            width: 390px;
+            height: 122px;
+            position: fixed;
+            text-align: center;
+            margin: 0 auto;
+            background: rgb(255, 255, 255);
+            border: 5px solid black;
+            top: 170px;
+            left: 475px;
+            line-height: 2;
+            padding-top: 20px;
+            font-weight: bold;
+            font-size: 20px;
+            color: red
+        }
+
+        .word {
+            color: blue;
+            font-size: 20px
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="v" v-if="popup">距離截止日2023-02-28尚有
+            <div class="word">{{timerOutput}}</div>
+            <button @click="clickbtn()">確定</button>
+        </div>
+
+        <div>
+            <table>
+                <thead>
+                    <tr>
+
+                        <th>交易對</th>
+                        <th>標記價格</th>
+                        <th>指數價格</th>
+                        <th>下次資金費率結算時間</th>
+                    </tr>
+
+                </thead>
+                <tbody>
+
+                    <tr v-for="(store, i) in allData">
+                        <td>{{store.pair}}</td>
+                        <td>{{store.markPrice}}</td>
+                        <td>{{store.indexPrice}}</td>
+                        <td>{{store.nextFundingTime}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <!-- <ol>
+                <component v-for="(store, i) in allData">
+                    <li>交易對：{{store.pair}}</li>
+                    <li>標記價格：{{store.markPrice}}</li>
+                    <li>指數價格：{{store.indexPrice}}</li>
+                    <li>下次資金費率結算時間：{{store.nextFundingTime}}</li>
+                </component>
+            </ol> -->
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.11/vue.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.3.3/axios.js"></script>
+    <script>
+        new Vue({
+            el: "#app",
+            data: {
+                //設定結束時間
+                countDownToTime: new Date("Feb 28, 2023 00:00:00").getTime(),
+                timerOutput: null,
+                popup: true,
+                allData: ""
+            },
+            created: function () {
+                this.a();
+            },
+            methods: {
+                startTimer() {
+                    const timeNow = new Date().getTime(); //抓取現在時間
+                    const timeDifference = this.countDownToTime - timeNow; //結束時間-現在時間
+                    const millisecondsInOneSecond = 1000; //毫秒
+                    const millisecondsInOneMinute = millisecondsInOneSecond * 60; //秒
+                    const millisecondsInOneHour = millisecondsInOneMinute * 60; //分
+                    const millisecondsInOneDay = millisecondsInOneHour * 24; //時
+                    const differenceInDays = timeDifference / millisecondsInOneDay;
+                    const remainderDifferenceInHours = (timeDifference % millisecondsInOneDay) / millisecondsInOneHour;
+                    const remainderDifferenceInMinutes = (timeDifference % millisecondsInOneHour) / millisecondsInOneMinute;
+                    const remainderDifferenceInSeconds = (timeDifference % millisecondsInOneMinute) / millisecondsInOneSecond;
+                    const remainingDays = Math.floor(differenceInDays);
+                    const remainingHours = Math.floor(remainderDifferenceInHours);
+                    const remainingMinutes = Math.floor(remainderDifferenceInMinutes);
+                    const remainingSeconds = Math.floor(remainderDifferenceInSeconds);
+                    this.timerOutput = remainingDays + " Days " + "    " + remainingHours + " Hours " + ": " + remainingMinutes + " Minutes " + ": " + remainingSeconds + " Seconds";
+                },
+                a() {
+                    axios.get("https://testnet.binancefuture.com/dapi/v1/premiumIndex", {
+
+                    })
+
+                        // then :處理 Promise返回的結果
+                        .then((res) => {
+                            this.allData = res.data;
+                            // console.log(res.data[0]);
+                        })
+
+                    //catch:抓取Promise 上異常
+                    // .catch((err) => console.log("[ error]", err));
+                },
+                clickbtn() {
+                    this.popup = false;
+                }
+            },
+            mounted() {
+                setInterval(() => { this.startTimer() }, 1000);
+            }
+        });
+    </script>
+</body>
+
+</html>
